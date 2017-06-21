@@ -9,7 +9,7 @@
 #import "ViewController.h"
 
 @interface ViewController ()
-
+@property (nonatomic, strong)NSString *weatherUrl;
 @property (nonatomic, strong)NSArray *imageArray;
 @property (nonatomic, strong)NSOperationQueue *imgQueue;
 
@@ -23,11 +23,13 @@
     self.imageTableView.dataSource = self;
     self.imgQueue = [[NSOperationQueue alloc]init];
     self.imgQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
+    self.weatherUrl = @"http://api.wunderground.com/api/39c6d95e30243c4b/conditions/q/CA/San_Francisco.json";
     
     self.imageArray = @[@"https://www.gstatic.com/webp/gallery3/1.png",
                         @"https://www.gstatic.com/webp/gallery3/2.png",
                         @"https://www.gstatic.com/webp/gallery3/3.png",
                         @"https://www.gstatic.com/webp/gallery3/5.png"];
+    [self getWeatherData];
 
     // Do any additional setup after loading the view, typically from a nib.
 }
@@ -53,9 +55,10 @@
 
     
     //Implement using GCD
-    dispatch_queue_t backgroudThread = dispatch_queue_create("Image queue", NULL);
+    dispatch_queue_t backgroudThread = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     dispatch_async(backgroudThread, ^{
+        
         NSURL *imgUrl = [NSURL URLWithString:urlString];
         NSData *imgData = [NSData dataWithContentsOfURL:imgUrl];
         UIImage *image = [UIImage imageWithData:imgData];
@@ -63,6 +66,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [cell.imageView setImage:image];
             [cell setNeedsLayout];
+            //NSLog(@"%@",json);
         });
                           
     });
@@ -86,5 +90,30 @@
     
 }
 
+
+-(void)getWeatherData{
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    dispatch_async(queue, ^{
+        NSError *error = nil;
+        NSURL *url = [NSURL URLWithString:@"http://api.wunderground.com/api/39c6d95e30243c4b/forecast10day/q/CA/San_Francisco.json"];
+        NSString *json = [NSString stringWithContentsOfURL:url
+                                                  encoding:NSASCIIStringEncoding
+                                                     error:&error];
+        NSLog(@"\nJSON: %@ \n Error: %@", json, error);
+        if(!error) {
+            NSData *jsonData = [json dataUsingEncoding:NSASCIIStringEncoding];
+            NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                     options:kNilOptions
+                                                                       error:&error];
+            NSLog(@"JSON: %@", jsonDict);
+        }
+        
+    });
+    
+   
+    
+    
+}
 
 @end
