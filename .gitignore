@@ -1,0 +1,11 @@
+*~
+.DS_Store
+
+# Mac OS X
+*.DS_Store
+
+# Xcode
+Xcshareddata/
+xcuserdatad/
+
+
