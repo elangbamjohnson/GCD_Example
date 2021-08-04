@@ -7,5 +7,5 @@
 # Xcode
 Xcshareddata/
 xcuserdatad/
-
+*.xcuserdatad/
 
